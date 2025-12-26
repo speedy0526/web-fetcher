@@ -17,6 +17,7 @@ __pycache__
 .vscode/*
 !.vscode/extensions.json
 .idea
+.venv
 .venv/*
 .env
 .env.*.local

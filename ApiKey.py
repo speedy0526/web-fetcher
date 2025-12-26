@@ -84,7 +84,7 @@ class ApiKeyManager:
         default_prefix: Optional[str] = "sk-",
         use_safe_chars: bool = True,
         include_symbols: bool = False,
-        persist_file: str = "./apikey_store.json",
+        persist_file: str = "./apikey_store.m5",
     ):
         self.salt = salt
         self.default_length = default_length
@@ -323,7 +323,7 @@ class ApiKeyManager:
 # ===================== 测试 =====================
 if __name__ == "__main__":
     # 初始化
-    manager = ApiKeyManager(salt="test-salt-123", persist_file="./apikey_store.json")
+    manager = ApiKeyManager(salt="test-salt-123", persist_file="./apikey_store.m5")
 
     # 生成带组合权限的APIKey
     apikey = manager.generate_apikey(
@@ -345,8 +345,6 @@ if __name__ == "__main__":
     print(f"禁用后校验：{res}")
 
     # 重启验证
-    new_manager = ApiKeyManager(
-        salt="test-salt-123", persist_file="./apikey_store.json"
-    )
+    new_manager = ApiKeyManager(salt="test-salt-123", persist_file="./apikey_store.m5")
     res = new_manager.validate_apikey(apikey, ApiPermission.READ)
     print(f"重启后校验：{res}")

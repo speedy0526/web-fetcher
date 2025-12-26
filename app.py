@@ -16,9 +16,7 @@ API_KEY_NAME = "X-API-Key"
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
 # 初始化 ApiKeyManager
-api_key_manager = ApiKeyManager(
-    salt="test-salt-123", persist_file="./apikey_store.json"
-)
+api_key_manager = ApiKeyManager(salt="test-salt-123", persist_file="./apikey_store.m5")
 
 
 # 验证函数

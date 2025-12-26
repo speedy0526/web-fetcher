@@ -7,7 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-apikey_store.json
+*.m5
 node_modules
 dist
 dist-ssr

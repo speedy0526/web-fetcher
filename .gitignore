@@ -17,7 +17,12 @@ __pycache__
 !.vscode/extensions.json
 .idea
 .venv
+.env
+.env.*.local
+*.env
+# MacOS
 .DS_Store
+*.lock
 *.suo
 *.ntvs*
 *.njsproj

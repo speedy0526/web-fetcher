@@ -60,19 +60,12 @@ class WebFetcher:
         try:
             from playwright.sync_api import sync_playwright
             from playwright_stealth.stealth import Stealth
-
-            with sync_playwright() as p, p.chromium.launch(
-                headless=True,args=[
-                    "--disable-gpu", # 禁用GPU加速
-                    "--disable-extensions", # 禁用扩展
-                    "--disable-dev-shm-usage", # 解决内存不足问题
-                    "--no-sandbox" # 禁用沙箱（仅测试环境）
-                ]
-            ) as browser, browser.new_context() as context, context.new_page(java_script_enabled=False) as page:
+            
+            ws_endpoint = 'ws://localhost:38291/e23e18f9f7deb171b72e32294f701368'
+            with sync_playwright() as p, p.chromium.connect(ws_endpoint) as browser, browser.new_context(java_script_enabled=False) as context, context.new_page() as page:
                 self._block_unnecessary_resources(page)
                 Stealth().apply_stealth_sync(page)
                 page.goto(url, wait_until="domcontentloaded")
-                page.wait_for_timeout(3000)
 
                 return page.content()
         except ImportError:

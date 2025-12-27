@@ -48,6 +48,13 @@ class WebFetcher:
 
         return response.text
 
+    def _block_unnecessary_resources(self,page):
+        # 拦截并阻断图片、视频、字体、第三方脚本
+        page.route("**/*.{png,jpg,jpeg,gif,webp,mp4,woff,woff2}", lambda route: route.abort())
+        # 阻断常见第三方广告/统计脚本
+        page.route("**/*{google-analytics,facebook,adsbygoogle}*", lambda route: route.abort())
+
+    
     def _fetch_with_playwright(self, url):
         """使用Playwright获取动态内容"""
         try:
@@ -55,11 +62,16 @@ class WebFetcher:
             from playwright_stealth.stealth import Stealth
 
             with sync_playwright() as p, p.chromium.launch(
-                headless=True
-            ) as browser, browser.new_context() as context, context.new_page() as page:
+                headless="new",args=[
+                    "--disable-gpu", # 禁用GPU加速
+                    "--disable-extensions", # 禁用扩展
+                    "--disable-dev-shm-usage", # 解决内存不足问题
+                    "--no-sandbox" # 禁用沙箱（仅测试环境）
+                ]
+            ) as browser, browser.new_context() as context, context.new_page(java_script_enabled=False) as page:
+                self._block_unnecessary_resources(page)
                 Stealth().apply_stealth_sync(page)
-
-                page.goto(url, wait_until="networkidle")
+                page.goto(url, wait_until="domcontentloaded")
                 page.wait_for_timeout(3000)
 
                 return page.content()

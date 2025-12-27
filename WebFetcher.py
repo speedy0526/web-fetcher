@@ -62,7 +62,7 @@ class WebFetcher:
             from playwright_stealth.stealth import Stealth
 
             with sync_playwright() as p, p.chromium.launch(
-                headless="new",args=[
+                headless=True,args=[
                     "--disable-gpu", # 禁用GPU加速
                     "--disable-extensions", # 禁用扩展
                     "--disable-dev-shm-usage", # 解决内存不足问题

@@ -45,7 +45,7 @@ class FileLock:
 
 
 # ===================== 权限枚举（显式指定数值，避免auto()兼容问题）=====================
-class ApiPermission(Flag):
+class APIPermission(Flag):
     """APIKey 权限枚举（显式指定整数值，解决转换兼容问题）"""
 
     NONE = 0  # 无权限
@@ -56,7 +56,7 @@ class ApiPermission(Flag):
     FULL_ACCESS = READ | WRITE | DELETE  # 7
 
     @classmethod
-    def from_str(cls, permission_str: str) -> "ApiPermission":
+    def from_str(cls, permission_str: str) -> "APIPermission":
         if not permission_str:
             return cls.NONE
         permission_map = {
@@ -76,7 +76,7 @@ class ApiPermission(Flag):
 
 
 # ===================== APIKey 管理类（核心修复序列化逻辑）=====================
-class ApiKeyManager:
+class APIKeyManager:
     def __init__(
         self,
         salt: str = "your-global-secret-salt-2025",
@@ -125,7 +125,7 @@ class ApiKeyManager:
             if isinstance(value, datetime):
                 return value.isoformat()
             # 终极修复：Flag枚举用 _value_ 属性取整数值（兼容所有Python版本）
-            elif isinstance(value, ApiPermission):
+            elif isinstance(value, APIPermission):
                 return value._value_  # 代替int(value)，这是枚举的标准取值方式
             elif isinstance(value, (int, float, str, bool, type(None))):
                 return value
@@ -146,7 +146,7 @@ class ApiKeyManager:
             elif key == "permissions" and value is not None:
                 # 兼容整数/字符串，转成int后再实例化枚举
                 val_int = int(value) if isinstance(value, str) else value
-                return ApiPermission(val_int)
+                return APIPermission(val_int)
             else:
                 return value
         except Exception as e:
@@ -197,7 +197,7 @@ class ApiKeyManager:
     def generate_apikey(
         self,
         expire_at: Optional[Union[datetime, timedelta]] = None,
-        permissions: Union[ApiPermission, str] = ApiPermission.NONE,
+        permissions: Union[APIPermission, str] = APIPermission.NONE,
         user_id: Optional[str] = None,
         length: Optional[int] = None,
         prefix: Optional[str] = None,
@@ -207,12 +207,12 @@ class ApiKeyManager:
         if length < 8:
             raise ValueError("APIKey长度≥8位")
 
-        # 强制转换为ApiPermission实例
+        # 强制转换为APIPermission实例
         if isinstance(permissions, str):
-            permissions = ApiPermission.from_str(permissions)
-        if not isinstance(permissions, ApiPermission):
+            permissions = APIPermission.from_str(permissions)
+        if not isinstance(permissions, APIPermission):
             raise TypeError(
-                f"权限必须是ApiPermission或字符串，当前：{type(permissions)}"
+                f"权限必须是APIPermission或字符串，当前：{type(permissions)}"
             )
 
         # 处理过期时间
@@ -245,8 +245,8 @@ class ApiKeyManager:
         return raw_apikey
 
     def validate_apikey(
-        self, api_key: str, required_permissions: Optional[ApiPermission] = None
-    ) -> Dict[str, Union[bool, str, ApiPermission, datetime]]:
+        self, api_key: str, required_permissions: Optional[APIPermission] = None
+    ) -> Dict[str, Union[bool, str, APIPermission, datetime]]:
         hashed_apikey = self._hash_apikey(api_key)
         if hashed_apikey not in self.apikey_store:
             return {
@@ -323,12 +323,12 @@ class ApiKeyManager:
 # ===================== 测试 =====================
 if __name__ == "__main__":
     # 初始化
-    manager = ApiKeyManager(salt="test-salt-123", persist_file="./apikey_store.m5")
+    manager = APIKeyManager(salt="test-salt-123", persist_file="./apikey_store.m5")
 
     # 生成带组合权限的APIKey
     apikey = manager.generate_apikey(
         expire_at=timedelta(days=7),
-        permissions=ApiPermission.READ_WRITE,
+        permissions=APIPermission.READ_WRITE,
         user_id="test_user",
         prefix="sk-",
         length=24,
@@ -336,15 +336,15 @@ if __name__ == "__main__":
     print(f"生成的APIKey：{apikey}")
 
     # 校验
-    res = manager.validate_apikey(apikey, ApiPermission.READ)
+    res = manager.validate_apikey(apikey, APIPermission.READ)
     print(f"校验结果：{res}")
 
     # 禁用
     manager.disable_apikey(apikey)
-    res = manager.validate_apikey(apikey, ApiPermission.READ)
+    res = manager.validate_apikey(apikey, APIPermission.READ)
     print(f"禁用后校验：{res}")
 
     # 重启验证
-    new_manager = ApiKeyManager(salt="test-salt-123", persist_file="./apikey_store.m5")
-    res = new_manager.validate_apikey(apikey, ApiPermission.READ)
+    new_manager = APIKeyManager(salt="test-salt-123", persist_file="./apikey_store.m5")
+    res = new_manager.validate_apikey(apikey, APIPermission.READ)
     print(f"重启后校验：{res}")

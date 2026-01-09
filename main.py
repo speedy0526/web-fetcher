@@ -4,7 +4,7 @@ from fastapi.security.api_key import APIKeyHeader
 from starlette.status import HTTP_403_FORBIDDEN
 from urllib.parse import unquote
 from app.Fetcher import UrlFetcher
-from app.APIKey import ApiKeyManager, ApiPermission
+from app.APIKey import APIKeyManager, APIPermission
 
 # 1. 创建 FastAPI 实例
 app = FastAPI()
@@ -15,8 +15,8 @@ API_KEY_NAME = "X-API-Key"
 # 创建 API Key Header 验证器
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
-# 初始化 ApiKeyManager
-api_key_manager = ApiKeyManager(salt="test-salt-123", persist_file="./apikey_store.m5")
+# 初始化 APIKeyManager
+api_key_manager = APIKeyManager(salt="test-salt-123", persist_file="./apikey_store.m5")
 
 
 # 验证函数
@@ -24,7 +24,7 @@ def get_api_key(api_key_header_value: str = Security(api_key_header)):
     """
     验证 API Key 是否正确
     """
-    valid = api_key_manager.validate_apikey(api_key_header_value, ApiPermission.READ)
+    valid = api_key_manager.validate_apikey(api_key_header_value, APIPermission.READ)
 
     if not valid["is_valid"]:
         raise HTTPException(

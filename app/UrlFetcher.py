@@ -5,7 +5,7 @@ import time
 from bs4 import BeautifulSoup
 
 
-class Fetcher:
+class UrlFetcher:
     def __init__(self):
         self.logger = self._setup_logging()
 
@@ -119,7 +119,7 @@ class Fetcher:
 
 
 if __name__ == "__main__":
-    fetcher = Fetcher()
+    fetcher = UrlFetcher()
     result = fetcher.fetch_content(
         "https://wallstreetcn.com/articles/3762000", use_js=True
     )

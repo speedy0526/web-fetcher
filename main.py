@@ -3,8 +3,8 @@ from fastapi import FastAPI, Depends, HTTPException, Security, Path
 from fastapi.security.api_key import APIKeyHeader
 from starlette.status import HTTP_403_FORBIDDEN
 from urllib.parse import unquote
-from WebFetcher import WebFetcher
-from ApiKey import ApiKeyManager, ApiPermission
+from app.Fetcher import Fetcher
+from app.APIKey import ApiKeyManager, ApiPermission
 
 # 1. 创建 FastAPI 实例
 app = FastAPI()
@@ -40,7 +40,7 @@ def fetch_html(
 ):
     print(f"Received request for URL: {url} with API Key: {api_key}")
     # 调用 WebFetcher 类获取网页内容
-    return WebFetcher().fetch_content(unquote(url), use_js=True)
+    return Fetcher().fetch_content(unquote(url), use_js=True)
 
 
 if __name__ == "__main__":

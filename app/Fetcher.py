@@ -5,7 +5,7 @@ import time
 from bs4 import BeautifulSoup
 
 
-class WebFetcher:
+class Fetcher:
     def __init__(self):
         self.logger = self._setup_logging()
 
@@ -48,21 +48,29 @@ class WebFetcher:
 
         return response.text
 
-    def _block_unnecessary_resources(self,page):
+    def _block_unnecessary_resources(self, page):
         # 拦截并阻断图片、视频、字体、第三方脚本
-        page.route("**/*.{png,jpg,jpeg,gif,webp,mp4,woff,woff2}", lambda route: route.abort())
+        page.route(
+            "**/*.{png,jpg,jpeg,gif,webp,mp4,woff,woff2}", lambda route: route.abort()
+        )
         # 阻断常见第三方广告/统计脚本
-        page.route("**/*{google-analytics,facebook,adsbygoogle}*", lambda route: route.abort())
+        page.route(
+            "**/*{google-analytics,facebook,adsbygoogle}*", lambda route: route.abort()
+        )
 
-    
     def _fetch_with_playwright(self, url):
         """使用Playwright获取动态内容"""
         try:
             from playwright.sync_api import sync_playwright
             from playwright_stealth.stealth import Stealth
-            
-            ws_endpoint = 'ws://localhost:38291/e23e18f9f7deb171b72e32294f701368'
-            with sync_playwright() as p, p.chromium.connect(ws_endpoint) as browser, browser.new_context(java_script_enabled=False) as context, context.new_page() as page:
+
+            ws_endpoint = "ws://localhost:38291/e23e18f9f7deb171b72e32294f701368"
+            with (
+                sync_playwright() as p,
+                p.chromium.connect(ws_endpoint) as browser,
+                browser.new_context(java_script_enabled=False) as context,
+                context.new_page() as page,
+            ):
                 self._block_unnecessary_resources(page)
                 Stealth().apply_stealth_sync(page)
                 page.goto(url, wait_until="domcontentloaded")
@@ -111,7 +119,7 @@ class WebFetcher:
 
 
 if __name__ == "__main__":
-    fetcher = WebFetcher()
+    fetcher = Fetcher()
     result = fetcher.fetch_content(
         "https://wallstreetcn.com/articles/3762000", use_js=True
     )
